@@ -1,9 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/home_screen.dart';
 import 'package:myapp/screens/login_screen.dart';
 import 'package:myapp/screens/settings_screen.dart';
 import 'package:myapp/storage_service.dart';
 import 'package:provider/provider.dart';
+import 'package:myapp/theme_provider.dart';
 
 void main() {
   runApp(
@@ -12,17 +14,6 @@ void main() {
       child: const MyApp(),
     ),
   );
-}
-
-class ThemeProvider with ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.dark;
-
-  ThemeMode get themeMode => _themeMode;
-
-  void toggleTheme(bool isDarkMode) {
-    _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    notifyListeners();
-  }
 }
 
 class MyApp extends StatefulWidget {
@@ -44,9 +35,11 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _checkLoginStatus() async {
     final apiKey = await _storageService.getApiKey();
-    setState(() {
-      _isLoggedIn = apiKey != null;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoggedIn = apiKey != null;
+      });
+    }
   }
 
   void _handleLogin(bool success) {
@@ -67,12 +60,34 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    const seedColor = Colors.deepPurple;
+
+    final lightTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: Brightness.light,
+      ),
+      useMaterial3: true,
+    );
+
+    final darkTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: Brightness.dark,
+      ),
+      useMaterial3: true,
+    );
+
+    final blackTheme = darkTheme.copyWith(
+      scaffoldBackgroundColor: Colors.black,
+    );
+
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
           title: 'Torbox Client',
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
+          theme: lightTheme,
+          darkTheme: themeProvider.theme == AppTheme.black ? blackTheme : darkTheme,
           themeMode: themeProvider.themeMode,
           debugShowCheckedModeBanner: false,
           home: _isLoggedIn
@@ -131,7 +146,6 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
     );

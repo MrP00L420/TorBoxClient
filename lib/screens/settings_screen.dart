@@ -1,10 +1,10 @@
+
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:myapp/api.dart';
-import 'package:myapp/main.dart';
 import 'package:myapp/models/user.dart';
 import 'package:myapp/storage_service.dart';
-import 'package:provider/provider.dart';
+import 'package:myapp/widgets/theme_switcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(bool) onLogout;
@@ -30,13 +30,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final apiKey = await _storageService.getApiKey();
       if (apiKey != null) {
         final api = TorboxApi(apiKey);
-        setState(() {
-          _userFuture = api.getUserDetails();
-        });
+        if (mounted) {
+          setState(() {
+            _userFuture = api.getUserDetails();
+          });
+        }
       } else {
-        setState(() {
-          _userFuture = Future.error('API Key not configured.');
-        });
+        if (mounted) {
+          setState(() {
+            _userFuture = Future.error('API Key not configured.');
+          });
+        }
       }
     } catch (e, s) {
       developer.log(
@@ -45,31 +49,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
         error: e,
         stackTrace: s,
       );
-      setState(() {
-        _userFuture = Future.error(e);
-      });
+      if (mounted) {
+        setState(() {
+          _userFuture = Future.error(e);
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
       ),
       body: ListView(
         children: [
-          ListTile(
-            title: const Text('Dark Mode'),
-            trailing: Switch(
-              value: themeProvider.themeMode == ThemeMode.dark,
-              onChanged: (value) {
-                themeProvider.toggleTheme(value);
-              },
-            ),
-          ),
+          const ThemeSwitcher(),
           const Divider(),
           FutureBuilder<User>(
             future: _userFuture,
@@ -109,11 +105,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: const Text('Email'),
                     subtitle: Text(user.email),
                     leading: const Icon(Icons.email),
-                  ),
-                  ListTile(
-                    title: const Text('Customer ID'),
-                    subtitle: Text(user.customer),
-                    leading: const Icon(Icons.person),
                   ),
                   ListTile(
                     title: const Text('Premium Expires At'),

@@ -1,12 +1,33 @@
+
 import 'package:flutter/material.dart';
 
+enum AppTheme {
+  system,
+  light,
+  dark,
+  black,
+}
+
 class ThemeProvider with ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.system;
+  AppTheme _theme = AppTheme.system;
 
-  ThemeMode get themeMode => _themeMode;
+  AppTheme get theme => _theme;
 
-  void setTheme(ThemeMode themeMode) {
-    _themeMode = themeMode;
+  ThemeMode get themeMode {
+    switch (_theme) {
+      case AppTheme.light:
+        return ThemeMode.light;
+      case AppTheme.dark:
+      case AppTheme.black:
+        return ThemeMode.dark;
+      case AppTheme.system:
+      default:
+        return ThemeMode.system;
+    }
+  }
+
+  void setTheme(AppTheme theme) {
+    _theme = theme;
     notifyListeners();
   }
 }
