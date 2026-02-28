@@ -1,0 +1,48 @@
+# General
+*.log
+firebase-debug.log
+*.DS_Store
+*.swp
+
+# IDE configuration files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Dart & Flutter
+.dart_tool/
+.packages
+.pub-cache/
+pubspec.lock
+build/
+.metadata
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android
+android/key.properties
+android/local.properties
+android/.gradle/
+android/app/build/
+android/app/src/main/assets/
+
+# iOS
+ios/build/
+ios/Pods/
+ios/.symlinks/
+ios/Runner/GeneratedPluginRegistrant.*
+ios/Flutter/App.framework
+ios/Flutter/engine.version
+ios/Flutter/flutter_export_environment.sh
+
+# Firebase & Development Artifacts
+lib/firebase_options.dart
+.firebaserc
+firebase.json
+firestore.rules
+firestore.indexes.json
+storage.rules
+blueprint.md
+GEMINI.md
