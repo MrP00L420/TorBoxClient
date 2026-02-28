@@ -30,7 +30,7 @@ class ThemeSwitcher extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(4.0),
           decoration: BoxDecoration(
-            color: themeData.colorScheme.surfaceVariant.withOpacity(0.5),
+            color: themeData.colorScheme.surfaceContainerHighest.withAlpha(128),
             borderRadius: BorderRadius.circular(24.0),
           ),
           child: Row(

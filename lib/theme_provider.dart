@@ -21,7 +21,6 @@ class ThemeProvider with ChangeNotifier {
       case AppTheme.black:
         return ThemeMode.dark;
       case AppTheme.system:
-      default:
         return ThemeMode.system;
     }
   }

@@ -1,3 +1,6 @@
+
+import 'package:myapp/models/file.dart';
+
 class Torrent {
   final int id;
   final String hash;
@@ -7,6 +10,7 @@ class Torrent {
   final double progress;
   final bool active;
   final bool downloadFinished;
+  final List<File> files;
 
   Torrent({
     required this.id,
@@ -17,18 +21,23 @@ class Torrent {
     required this.progress,
     required this.active,
     required this.downloadFinished,
+    required this.files,
   });
 
   factory Torrent.fromJson(Map<String, dynamic> json) {
+    var filesList = json['files'] as List? ?? [];
+    List<File> files = filesList.map((i) => File.fromJson(i)).toList();
+
     return Torrent(
-      id: json['id'],
-      hash: json['hash'],
-      name: json['name'],
-      size: json['size'],
-      downloadState: json['download_state'],
-      progress: json['progress']?.toDouble() ?? 0.0,
-      active: json['active'] ?? false,
-      downloadFinished: json['download_finished'] ?? false,
+      id: json['id'] as int? ?? 0,
+      hash: json['hash'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      size: json['size'] as int? ?? 0,
+      downloadState: json['download_state'] as String? ?? '',
+      progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
+      active: json['active'] as bool? ?? false,
+      downloadFinished: json['download_finished'] as bool? ?? false,
+      files: files,
     );
   }
 }

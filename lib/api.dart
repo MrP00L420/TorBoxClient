@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
+import 'package:myapp/models/torrent.dart';
 import 'package:myapp/models/user.dart';
 
 class TorboxApi {
@@ -12,7 +13,7 @@ class TorboxApi {
     developer.log('TorboxApi initialized', name: 'com.myapp.api');
   }
 
-  Future<List<dynamic>> getTorrents() async {
+  Future<List<Torrent>> getTorrents() async {
     final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/mylist');
     developer.log('Fetching torrents from: $url', name: 'com.myapp.api');
 
@@ -23,13 +24,13 @@ class TorboxApi {
       );
 
       developer.log('Response status code: ${response.statusCode}', name: 'com.myapp.api');
-      developer.log('Response body: ${response.body}', name: 'com.myapp.api');
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         if (body['success'] == true && body['data'] != null) {
           developer.log('Successfully fetched and decoded torrents.', name: 'com.myapp.api');
-          return body['data'] as List<dynamic>;
+          final List<dynamic> data = body['data'];
+          return data.map((dynamic item) => Torrent.fromJson(item as Map<String, dynamic>)).toList();
         } else {
           throw Exception(body['detail'] ?? 'Failed to load torrents');
         }
@@ -58,8 +59,6 @@ class TorboxApi {
       );
       
       developer.log('User details status code: ${response.statusCode}', name: 'com.myapp.api');
-      developer.log('User details response body: ${response.body}', name: 'com.myapp.api');
-
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -75,6 +74,62 @@ class TorboxApi {
     } catch (e, s) {
        developer.log(
         'Error fetching user details',
+        name: 'com.myapp.api',
+        error: e,
+        stackTrace: s,
+      );
+      rethrow;
+    }
+  }
+
+  Future<String> getDownloadLink({
+    required int torrentId,
+    required int fileId,
+    bool? zipLink,
+    String? userIp,
+    bool? redirect,
+  }) async {
+    final Map<String, String> queryParameters = {
+      'token': _apiKey,
+      'torrent_id': torrentId.toString(),
+      'file_id': fileId.toString(),
+    };
+
+    if (zipLink != null) {
+      queryParameters['zip_link'] = zipLink.toString();
+    }
+    if (userIp != null) {
+      queryParameters['user_ip'] = userIp;
+    }
+    if (redirect != null) {
+      queryParameters['redirect'] = redirect.toString();
+    }
+
+    final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/requestdl').replace(queryParameters: queryParameters);
+    developer.log('Requesting download link from: $url', name: 'com.myapp.api');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $_apiKey'},
+      );
+
+      developer.log('Response status code: ${response.statusCode}', name: 'com.myapp.api');
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body['success'] == true && body['data'] != null) {
+          developer.log('Successfully fetched download link.', name: 'com.myapp.api');
+          return body['data'] as String;
+        } else {
+          throw Exception(body['detail'] ?? 'Failed to get download link');
+        }
+      } else {
+        throw Exception('Failed to get download link: ${response.statusCode}');
+      }
+    } catch (e, s) {
+      developer.log(
+        'Error getting download link',
         name: 'com.myapp.api',
         error: e,
         stackTrace: s,
