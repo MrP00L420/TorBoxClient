@@ -128,7 +128,6 @@ class TorboxApi {
     required int torrentId,
     required int fileId,
   }) async {
-    // Build query parameters — only the essentials: token, torrent_id, file_id
     final Map<String, String> queryParameters = {
       'token': _apiKey,
       'torrent_id': torrentId.toString(),
@@ -179,13 +178,11 @@ class TorboxApi {
   // ---------------------------------------------------------------------------
   // getZipDownloadLink()
   // Gets a download URL for ALL files in a torrent bundled as a single ZIP.
-  // Uses zip_link=true and only requires the torrentId (no fileId needed).
+  // Uses zip_link=true and only requires the torrentId.
   // Endpoint: GET /v1/api/torrents/requestdl?token=...&torrent_id=...&zip_link=true
   // Returns: String — the ZIP download URL
   // ---------------------------------------------------------------------------
   Future<String> getZipDownloadLink({required int torrentId}) async {
-    // Build query parameters — torrent_id + zip_link flag set to true
-    // file_id is set to 0 as it's not relevant when downloading the whole torrent as ZIP
     final Map<String, String> queryParameters = {
       'token': _apiKey,
       'torrent_id': torrentId.toString(),
@@ -231,6 +228,70 @@ class TorboxApi {
     } catch (e, s) {
       developer.log(
         'Error getting ZIP download link',
+        name: 'com.myapp.api',
+        error: e,
+        stackTrace: s,
+      );
+      rethrow;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // createTorrent()
+  // Adds a new torrent to the user's account using a magnet link.
+  // Sends the magnet link as a multipart form field via POST.
+  // Endpoint: POST /v1/api/torrents/createtorrent
+  // Parameters:
+  //   - magnet: the full magnet URI string (e.g., "magnet:?xt=urn:btih:...")
+  // Returns: String — success message from the API (shown in SnackBar)
+  // ---------------------------------------------------------------------------
+  Future<String> createTorrent({required String magnet}) async {
+    final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/createtorrent');
+    developer.log(
+      'Creating torrent with magnet link at: $url',
+      name: 'com.myapp.api',
+    );
+
+    try {
+      // Use MultipartRequest because TorBox expects form-data for this endpoint
+      final request = http.MultipartRequest('POST', url);
+      request.headers['Authorization'] = 'Bearer $_apiKey';
+      request.fields['magnet'] = magnet;
+
+      // Send the request and convert the streamed response to a regular response
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      developer.log(
+        'Create torrent status code: ${response.statusCode}',
+        name: 'com.myapp.api',
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body['success'] == true) {
+          final message =
+              body['detail'] as String? ?? 'Torrent added successfully';
+          developer.log('Torrent created: $message', name: 'com.myapp.api');
+          return message;
+        } else {
+          throw Exception(body['detail'] ?? 'Failed to create torrent');
+        }
+      } else {
+        // Try to extract an error message from the response body
+        try {
+          final body = jsonDecode(response.body);
+          throw Exception(
+            body['detail'] ??
+                'Failed to create torrent: ${response.statusCode}',
+          );
+        } catch (_) {
+          throw Exception('Failed to create torrent: ${response.statusCode}');
+        }
+      }
+    } catch (e, s) {
+      developer.log(
+        'Error creating torrent',
         name: 'com.myapp.api',
         error: e,
         stackTrace: s,

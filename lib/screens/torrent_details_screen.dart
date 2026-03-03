@@ -72,7 +72,9 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
     // If no API key is found, show an error and stop
     if (apiKey == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('API Key not found. Please log in again.')),
+        const SnackBar(
+          content: Text('API Key not found. Please log in again.'),
+        ),
       );
       setState(() {
         _downloadingFileId = null;
@@ -90,8 +92,10 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
         fileId: file.id,
       );
 
-      developer.log('Got download link: $downloadLink',
-          name: 'com.myapp.download');
+      developer.log(
+        'Got download link: $downloadLink',
+        name: 'com.myapp.download',
+      );
 
       if (!mounted) return;
 
@@ -154,7 +158,9 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
     // If no API key is found, show an error and stop
     if (apiKey == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('API Key not found. Please log in again.')),
+        const SnackBar(
+          content: Text('API Key not found. Please log in again.'),
+        ),
       );
       setState(() {
         _downloadingZip = false;
@@ -171,8 +177,10 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
         torrentId: widget.torrent.id,
       );
 
-      developer.log('Got ZIP download link: $downloadLink',
-          name: 'com.myapp.download');
+      developer.log(
+        'Got ZIP download link: $downloadLink',
+        name: 'com.myapp.download',
+      );
 
       if (!mounted) return;
 
@@ -229,9 +237,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.torrent.name),
-      ),
+      appBar: AppBar(title: Text(widget.torrent.name)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -244,7 +250,8 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -253,27 +260,32 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
                     // Torrent name as the card header
                     Text(
                       widget.torrent.name,
-                      style: textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
                     // Total size of the torrent
                     ListTile(
-                      leading: Icon(Icons.folder_zip,
-                          color: theme.colorScheme.primary),
+                      leading: Icon(
+                        Icons.folder_zip,
+                        color: theme.colorScheme.primary,
+                      ),
                       title: const Text('Size'),
-                      subtitle:
-                          Text(_formatBytes(widget.torrent.size, 2)),
+                      subtitle: Text(_formatBytes(widget.torrent.size, 2)),
                     ),
 
                     // Current download state (e.g., "COMPLETED", "DOWNLOADING")
                     ListTile(
-                      leading: Icon(Icons.download_for_offline,
-                          color: theme.colorScheme.secondary),
+                      leading: Icon(
+                        Icons.download_for_offline,
+                        color: theme.colorScheme.secondary,
+                      ),
                       title: const Text('Status'),
                       subtitle: Text(
-                          widget.torrent.downloadState.toUpperCase()),
+                        widget.torrent.downloadState.toUpperCase(),
+                      ),
                     ),
                   ],
                 ),
@@ -319,14 +331,12 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
   Widget _buildFilesList(ThemeData theme) {
     // If the torrent has no files, show a placeholder message
     if (widget.torrent.files.isEmpty) {
-      return const Center(
-          child: Text('No files available in this torrent.'));
+      return const Center(child: Text('No files available in this torrent.'));
     }
 
     return Card(
       elevation: 2,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -341,12 +351,17 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
 
           return ListTile(
             // File icon on the left
-            leading: Icon(Icons.insert_drive_file_outlined,
-                color: theme.colorScheme.tertiary),
+            leading: Icon(
+              Icons.insert_drive_file_outlined,
+              color: theme.colorScheme.tertiary,
+            ),
 
             // File name — limited to 2 lines with ellipsis overflow
-            title: Text(file.name,
-                maxLines: 2, overflow: TextOverflow.ellipsis),
+            title: Text(
+              file.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
 
             // File size underneath the name
             subtitle: Text(_formatBytes(file.size, 2)),
@@ -360,8 +375,10 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : IconButton(
-                    icon: Icon(Icons.download,
-                        color: theme.colorScheme.primary),
+                    icon: Icon(
+                      Icons.download,
+                      color: theme.colorScheme.primary,
+                    ),
                     onPressed: () => _downloadSingleFile(file),
                     tooltip: 'Download ${file.shortName}',
                   ),
@@ -398,9 +415,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
 
         // Button label changes based on loading state
         label: Text(
-          _downloadingZip
-              ? 'Fetching ZIP link...'
-              : 'Download All as ZIP',
+          _downloadingZip ? 'Fetching ZIP link...' : 'Download All as ZIP',
         ),
 
         // Styled with primary color, rounded corners, and some padding
