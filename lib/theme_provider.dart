@@ -1,12 +1,6 @@
-
 import 'package:flutter/material.dart';
 
-enum AppTheme {
-  system,
-  light,
-  dark,
-  black,
-}
+enum AppTheme { system, light, dark, black }
 
 class ThemeProvider with ChangeNotifier {
   AppTheme _theme = AppTheme.system;

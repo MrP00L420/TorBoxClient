@@ -6,10 +6,10 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
-import 'package:myapp/api.dart';
-import 'package:myapp/models/file.dart' as t_file;
-import 'package:myapp/models/torrent.dart';
-import 'package:myapp/storage_service.dart';
+import 'package:TBox/api.dart';
+import 'package:TBox/models/file.dart';
+import 'package:TBox/models/torrent.dart';
+import 'package:TBox/storage_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:math';
 import 'dart:developer' as developer;
@@ -24,6 +24,8 @@ class TorrentDetailsScreen extends StatefulWidget {
 }
 
 class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
+  final _storageService = StorageService();
+
   // ---------------------------------------------------------------------------
   // State variables
   // ---------------------------------------------------------------------------
@@ -41,14 +43,13 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
   // Converts raw byte count into a human-readable string (e.g., "1.23 GB").
   // Parameters:
   //   - bytes: the raw size in bytes
-  //   - decimals: number of decimal places to show
   // Returns: formatted string like "4.20 MB"
   // ---------------------------------------------------------------------------
-  String _formatBytes(int bytes, int decimals) {
+  String _formatBytes(int bytes) {
     if (bytes <= 0) return "0 B";
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     final i = (log(bytes) / log(1024)).floor();
-    return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
+    return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
   }
 
   // ---------------------------------------------------------------------------
@@ -60,13 +61,13 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
   //   3. Launch the returned URL in an external browser
   // Shows a loading spinner on the specific file's download button while working.
   // ---------------------------------------------------------------------------
-  Future<void> _downloadSingleFile(t_file.File file) async {
+  Future<void> _downloadSingleFile(TorrentFile file) async {
     // Set loading state for this specific file
     setState(() {
       _downloadingFileId = file.id;
     });
 
-    final apiKey = await StorageService().getApiKey();
+    final apiKey = await _storageService.getApiKey();
     if (!mounted) return;
 
     // If no API key is found, show an error and stop
@@ -94,7 +95,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
 
       developer.log(
         'Got download link: $downloadLink',
-        name: 'com.myapp.download',
+        name: 'dev.TBox.download',
       );
 
       if (!mounted) return;
@@ -117,7 +118,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
         );
       }
     } catch (e) {
-      developer.log('Error downloading file: $e', name: 'com.myapp.download');
+      developer.log('Error downloading file: $e', name: 'dev.TBox.download');
       if (!mounted) return;
 
       // Show error message in a SnackBar
@@ -152,7 +153,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
       _downloadingZip = true;
     });
 
-    final apiKey = await StorageService().getApiKey();
+    final apiKey = await _storageService.getApiKey();
     if (!mounted) return;
 
     // If no API key is found, show an error and stop
@@ -179,7 +180,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
 
       developer.log(
         'Got ZIP download link: $downloadLink',
-        name: 'com.myapp.download',
+        name: 'dev.TBox.download',
       );
 
       if (!mounted) return;
@@ -202,7 +203,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
         );
       }
     } catch (e) {
-      developer.log('Error downloading ZIP: $e', name: 'com.myapp.download');
+      developer.log('Error downloading ZIP: $e', name: 'dev.TBox.download');
       if (!mounted) return;
 
       // Show error message in a SnackBar
@@ -273,7 +274,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
                         color: theme.colorScheme.primary,
                       ),
                       title: const Text('Size'),
-                      subtitle: Text(_formatBytes(widget.torrent.size, 2)),
+                      subtitle: Text(_formatBytes(widget.torrent.size)),
                     ),
 
                     // Current download state (e.g., "COMPLETED", "DOWNLOADING")
@@ -364,7 +365,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
             ),
 
             // File size underneath the name
-            subtitle: Text(_formatBytes(file.size, 2)),
+            subtitle: Text(_formatBytes(file.size)),
 
             // Download button on the right
             // Shows a loading spinner if this file's download link is being fetched

@@ -7,8 +7,8 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
-import 'package:myapp/models/torrent.dart';
-import 'package:myapp/models/user.dart';
+import 'package:TBox/models/torrent.dart';
+import 'package:TBox/models/user.dart';
 
 class TorboxApi {
   final String _apiKey;
@@ -16,7 +16,7 @@ class TorboxApi {
   final String _apiVersion = 'v1';
 
   TorboxApi(this._apiKey) {
-    developer.log('TorboxApi initialized', name: 'com.myapp.api');
+    developer.log('TorboxApi initialized', name: 'dev.TBox.api');
   }
 
   // ---------------------------------------------------------------------------
@@ -27,7 +27,7 @@ class TorboxApi {
   // ---------------------------------------------------------------------------
   Future<List<Torrent>> getTorrents() async {
     final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/mylist');
-    developer.log('Fetching torrents from: $url', name: 'com.myapp.api');
+    developer.log('Fetching torrents from: $url', name: 'dev.TBox.api');
 
     try {
       final response = await http.get(
@@ -37,7 +37,7 @@ class TorboxApi {
 
       developer.log(
         'Response status code: ${response.statusCode}',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
       );
 
       if (response.statusCode == 200) {
@@ -45,7 +45,7 @@ class TorboxApi {
         if (body['success'] == true && body['data'] != null) {
           developer.log(
             'Successfully fetched and decoded torrents.',
-            name: 'com.myapp.api',
+            name: 'dev.TBox.api',
           );
           final List<dynamic> data = body['data'];
           return data
@@ -63,7 +63,7 @@ class TorboxApi {
     } catch (e, s) {
       developer.log(
         'Error fetching torrents',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
         error: e,
         stackTrace: s,
       );
@@ -79,7 +79,7 @@ class TorboxApi {
   // ---------------------------------------------------------------------------
   Future<User> getUserDetails() async {
     final url = Uri.parse('$_apiBase/$_apiVersion/api/user/me?settings=false');
-    developer.log('Fetching user details from: $url', name: 'com.myapp.api');
+    developer.log('Fetching user details from: $url', name: 'dev.TBox.api');
 
     try {
       final response = await http.get(
@@ -89,7 +89,7 @@ class TorboxApi {
 
       developer.log(
         'User details status code: ${response.statusCode}',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
       );
 
       if (response.statusCode == 200) {
@@ -97,7 +97,7 @@ class TorboxApi {
         if (body['success'] == true && body['data'] != null) {
           developer.log(
             'Successfully fetched user details.',
-            name: 'com.myapp.api',
+            name: 'dev.TBox.api',
           );
           return User.fromJson(body['data'] as Map<String, dynamic>);
         } else {
@@ -109,7 +109,7 @@ class TorboxApi {
     } catch (e, s) {
       developer.log(
         'Error fetching user details',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
         error: e,
         stackTrace: s,
       );
@@ -120,34 +120,29 @@ class TorboxApi {
   // ---------------------------------------------------------------------------
   // getDownloadLink()
   // Gets a direct download URL for a single file within a torrent.
-  // Only requires torrentId and fileId — no extra parameters.
-  // Endpoint: GET /v1/api/torrents/requestdl?token=...&torrent_id=...&file_id=...
+  // Endpoint: GET /v1/api/torrents/requestdl?token=...&torrent_id=...&file_id=...&zip_link=false
   // Returns: String — the direct download URL
   // ---------------------------------------------------------------------------
   Future<String> getDownloadLink({
     required int torrentId,
     required int fileId,
   }) async {
-    final Map<String, String> queryParameters = {
+    final queryParameters = {
       'token': _apiKey,
       'torrent_id': torrentId.toString(),
       'file_id': fileId.toString(),
+      'zip_link': 'false',
     };
-
-    final url = Uri.parse(
-      '$_apiBase/$_apiVersion/api/torrents/requestdl',
-    ).replace(queryParameters: queryParameters);
-    developer.log('Requesting download link from: $url', name: 'com.myapp.api');
+    final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/requestdl')
+        .replace(queryParameters: queryParameters);
+    developer.log('Requesting download link from: $url', name: 'dev.TBox.api');
 
     try {
-      final response = await http.get(
-        url,
-        headers: {'Authorization': 'Bearer $_apiKey'},
-      );
+      final response = await http.get(url);
 
       developer.log(
         'Response status code: ${response.statusCode}',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
       );
 
       if (response.statusCode == 200) {
@@ -155,7 +150,7 @@ class TorboxApi {
         if (body['success'] == true && body['data'] != null) {
           developer.log(
             'Successfully fetched download link.',
-            name: 'com.myapp.api',
+            name: 'dev.TBox.api',
           );
           return body['data'] as String;
         } else {
@@ -167,7 +162,7 @@ class TorboxApi {
     } catch (e, s) {
       developer.log(
         'Error getting download link',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
         error: e,
         stackTrace: s,
       );
@@ -178,35 +173,29 @@ class TorboxApi {
   // ---------------------------------------------------------------------------
   // getZipDownloadLink()
   // Gets a download URL for ALL files in a torrent bundled as a single ZIP.
-  // Uses zip_link=true and only requires the torrentId.
   // Endpoint: GET /v1/api/torrents/requestdl?token=...&torrent_id=...&zip_link=true
   // Returns: String — the ZIP download URL
   // ---------------------------------------------------------------------------
   Future<String> getZipDownloadLink({required int torrentId}) async {
-    final Map<String, String> queryParameters = {
+    final queryParameters = {
       'token': _apiKey,
       'torrent_id': torrentId.toString(),
-      'file_id': '0',
       'zip_link': 'true',
     };
 
-    final url = Uri.parse(
-      '$_apiBase/$_apiVersion/api/torrents/requestdl',
-    ).replace(queryParameters: queryParameters);
+    final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/requestdl')
+        .replace(queryParameters: queryParameters);
     developer.log(
       'Requesting ZIP download link from: $url',
-      name: 'com.myapp.api',
+      name: 'dev.TBox.api',
     );
 
     try {
-      final response = await http.get(
-        url,
-        headers: {'Authorization': 'Bearer $_apiKey'},
-      );
+      final response = await http.get(url);
 
       developer.log(
         'Response status code: ${response.statusCode}',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
       );
 
       if (response.statusCode == 200) {
@@ -214,7 +203,7 @@ class TorboxApi {
         if (body['success'] == true && body['data'] != null) {
           developer.log(
             'Successfully fetched ZIP download link.',
-            name: 'com.myapp.api',
+            name: 'dev.TBox.api',
           );
           return body['data'] as String;
         } else {
@@ -228,7 +217,7 @@ class TorboxApi {
     } catch (e, s) {
       developer.log(
         'Error getting ZIP download link',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
         error: e,
         stackTrace: s,
       );
@@ -249,7 +238,7 @@ class TorboxApi {
     final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/createtorrent');
     developer.log(
       'Creating torrent with magnet link at: $url',
-      name: 'com.myapp.api',
+      name: 'dev.TBox.api',
     );
 
     try {
@@ -264,7 +253,7 @@ class TorboxApi {
 
       developer.log(
         'Create torrent status code: ${response.statusCode}',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
       );
 
       if (response.statusCode == 200) {
@@ -272,7 +261,7 @@ class TorboxApi {
         if (body['success'] == true) {
           final message =
               body['detail'] as String? ?? 'Torrent added successfully';
-          developer.log('Torrent created: $message', name: 'com.myapp.api');
+          developer.log('Torrent created: $message', name: 'dev.TBox.api');
           return message;
         } else {
           throw Exception(body['detail'] ?? 'Failed to create torrent');
@@ -292,7 +281,7 @@ class TorboxApi {
     } catch (e, s) {
       developer.log(
         'Error creating torrent',
-        name: 'com.myapp.api',
+        name: 'dev.TBox.api',
         error: e,
         stackTrace: s,
       );

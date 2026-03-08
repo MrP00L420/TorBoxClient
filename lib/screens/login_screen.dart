@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/storage_service.dart';
+import 'package:TBox/storage_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function(bool) onLoginResult;
@@ -21,9 +21,9 @@ class _LoginScreenState extends State<LoginScreen> {
       await _storageService.saveApiKey(apiKey);
       widget.onLoginResult(true);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter an API key')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter an API key')));
     }
   }
 
@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       body: SingleChildScrollView(
         child: SizedBox(
           height: size.height,
@@ -44,17 +44,17 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 height: size.height * 0.5,
                 width: size.width,
-                color: Colors.blue.shade700,
+                color: theme.colorScheme.primary,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Login',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: theme.colorScheme.onPrimary,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                         ),
@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Enter API key to continue',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: theme.colorScheme.onPrimary.withOpacity(0.8),
                           fontSize: 16,
                         ),
                       ),
@@ -77,9 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Container(
                   height: size.height * 0.6,
                   width: size.width,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(30),
                       topRight: Radius.circular(30),
                     ),
@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextField(
                           controller: _apiKeyController,
                           obscureText: _obscureText,
-                          style: const TextStyle(color: Colors.black87),
+                          style: TextStyle(color: theme.colorScheme.onSurface),
                           decoration: InputDecoration(
                             labelText: 'API Key',
                             prefixIcon: const Icon(Icons.vpn_key_outlined),
@@ -114,7 +114,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.outline,
+                              ),
                             ),
                           ),
                         ),
@@ -122,8 +124,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ElevatedButton(
                           onPressed: _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade700,
-                            foregroundColor: Colors.white,
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),

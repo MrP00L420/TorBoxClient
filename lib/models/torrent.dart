@@ -1,5 +1,4 @@
-
-import 'package:myapp/models/file.dart';
+import 'package:TBox/models/file.dart';
 
 class Torrent {
   final int id;
@@ -10,7 +9,7 @@ class Torrent {
   final double progress;
   final bool active;
   final bool downloadFinished;
-  final List<File> files;
+  final List<TorrentFile> files;
 
   Torrent({
     required this.id,
@@ -26,7 +25,9 @@ class Torrent {
 
   factory Torrent.fromJson(Map<String, dynamic> json) {
     var filesList = json['files'] as List? ?? [];
-    List<File> files = filesList.map((i) => File.fromJson(i)).toList();
+    List<TorrentFile> files = filesList
+        .map((i) => TorrentFile.fromJson(i))
+        .toList();
 
     return Torrent(
       id: json['id'] as int? ?? 0,

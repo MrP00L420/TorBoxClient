@@ -9,10 +9,10 @@ import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:myapp/api.dart';
-import 'package:myapp/models/torrent.dart';
-import 'package:myapp/screens/torrent_details_screen.dart';
-import 'package:myapp/storage_service.dart';
+import 'package:TBox/api.dart';
+import 'package:TBox/models/torrent.dart';
+import 'package:TBox/screens/torrent_details_screen.dart';
+import 'package:TBox/storage_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    developer.log('HomeScreen initState', name: 'com.myapp.ui');
+    developer.log('HomeScreen initState', name: 'dev.TBox.ui');
 
     // Initialize the FAB animation — 250ms for a snappy feel
     _fabAnimationController = AnimationController(
@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen>
   // On error: stores error message in _error (shown in UI)
   // ---------------------------------------------------------------------------
   Future<void> _fetchTorrents() async {
-    developer.log('Fetching torrents...', name: 'com.myapp.ui');
+    developer.log('Fetching torrents...', name: 'dev.TBox.ui');
 
     // Set loading state — shows the spinner in the UI
     setState(() {
@@ -124,10 +124,7 @@ class _HomeScreenState extends State<HomeScreen>
       // properly detected as "new" by FutureBuilder.
       final torrents = await api.getTorrents();
 
-      developer.log(
-        'Fetched ${torrents.length} torrents',
-        name: 'com.myapp.ui',
-      );
+      developer.log('Fetched ${torrents.length} torrents', name: 'dev.TBox.ui');
 
       if (mounted) {
         setState(() {
@@ -139,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen>
     } catch (e, s) {
       developer.log(
         'Error fetching torrents',
-        name: 'com.myapp.ui',
+        name: 'dev.TBox.ui',
         error: e,
         stackTrace: s,
       );
@@ -175,11 +172,11 @@ class _HomeScreenState extends State<HomeScreen>
   // _formatBytes()
   // Converts raw byte count into a human-readable string (e.g., "1.23 GB").
   // ---------------------------------------------------------------------------
-  String _formatBytes(int bytes, int decimals) {
+  String _formatBytes(int bytes) {
     if (bytes <= 0) return "0 B";
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     final i = (log(bytes) / log(1024)).floor();
-    return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
+    return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
   }
 
   // ---------------------------------------------------------------------------
@@ -729,7 +726,7 @@ class _HomeScreenState extends State<HomeScreen>
               color: theme.colorScheme.secondary,
             ),
             const SizedBox(width: 8),
-            Text(_formatBytes(torrent.size, 2)),
+            Text(_formatBytes(torrent.size)),
             const SizedBox(width: 16),
             Icon(
               Icons.info_outline,

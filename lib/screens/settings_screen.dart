@@ -1,10 +1,9 @@
-
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:myapp/api.dart';
-import 'package:myapp/models/user.dart';
-import 'package:myapp/storage_service.dart';
-import 'package:myapp/widgets/theme_switcher.dart';
+import 'package:TBox/api.dart';
+import 'package:TBox/models/user.dart';
+import 'package:TBox/storage_service.dart';
+import 'package:TBox/widgets/theme_switcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(bool) onLogout;
@@ -22,47 +21,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserDetails();
+    _userFuture = _fetchUserDetails();
   }
 
-  Future<void> _fetchUserDetails() async {
+  Future<User> _fetchUserDetails() async {
     try {
       final apiKey = await _storageService.getApiKey();
       if (apiKey != null) {
         final api = TorboxApi(apiKey);
-        if (mounted) {
-          setState(() {
-            _userFuture = api.getUserDetails();
-          });
-        }
+        return api.getUserDetails();
       } else {
-        if (mounted) {
-          setState(() {
-            _userFuture = Future.error('API Key not configured.');
-          });
-        }
+        throw Exception('API Key not configured.');
       }
     } catch (e, s) {
       developer.log(
         'Error fetching user details',
-        name: 'com.myapp.ui',
+        name: 'dev.TBox.ui',
         error: e,
         stackTrace: s,
       );
-      if (mounted) {
-        setState(() {
-          _userFuture = Future.error(e);
-        });
-      }
+      rethrow;
     }
+  }
+
+  void _reloadUserDetails() {
+    setState(() {
+      _userFuture = _fetchUserDetails();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           const ThemeSwitcher(),
@@ -80,14 +71,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 60,
+                        ),
                         const SizedBox(height: 16),
-                        Text('Error: ${snapshot.error}', textAlign: TextAlign.center),
+                        Text(
+                          'Error: ${snapshot.error}',
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: _fetchUserDetails,
+                          onPressed: _reloadUserDetails,
                           child: const Text('Retry'),
-                        )
+                        ),
                       ],
                     ),
                   ),

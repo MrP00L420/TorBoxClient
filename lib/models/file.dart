@@ -1,5 +1,4 @@
-
-class File {
+class TorrentFile {
   final int id;
   final String md5;
   final String s3Path;
@@ -8,7 +7,7 @@ class File {
   final String mimetype;
   final String shortName;
 
-  File({
+  TorrentFile({
     required this.id,
     required this.md5,
     required this.s3Path,
@@ -18,8 +17,8 @@ class File {
     required this.shortName,
   });
 
-  factory File.fromJson(Map<String, dynamic> json) {
-    return File(
+  factory TorrentFile.fromJson(Map<String, dynamic> json) {
+    return TorrentFile(
       id: json['id'] as int? ?? 0,
       md5: json['md5'] as String? ?? '',
       s3Path: json['s3_path'] as String? ?? '',

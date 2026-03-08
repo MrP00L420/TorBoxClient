@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:myapp/theme_provider.dart';
+import 'package:TBox/theme_provider.dart';
 
 class ThemeSwitcher extends StatelessWidget {
   const ThemeSwitcher({super.key});
@@ -22,10 +21,7 @@ class ThemeSwitcher extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 8),
-        const Text(
-          'Theme',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        const Text('Theme', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(4.0),
@@ -47,11 +43,19 @@ class ThemeSwitcher extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  padding: isSelected 
-                      ? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0) 
-                      : const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  padding: isSelected
+                      ? const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        )
+                      : const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 8.0,
+                        ),
                   decoration: BoxDecoration(
-                    color: isSelected ? themeData.colorScheme.primary : Colors.transparent,
+                    color: isSelected
+                        ? themeData.colorScheme.primary
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: Row(
@@ -59,7 +63,9 @@ class ThemeSwitcher extends StatelessWidget {
                       Icon(
                         details['icon'] as IconData,
                         size: 20,
-                        color: isSelected ? themeData.colorScheme.onPrimary : themeData.colorScheme.onSurface,
+                        color: isSelected
+                            ? themeData.colorScheme.onPrimary
+                            : themeData.colorScheme.onSurface,
                       ),
                       AnimatedSize(
                         duration: const Duration(milliseconds: 300),
@@ -70,7 +76,9 @@ class ThemeSwitcher extends StatelessWidget {
                                 child: Text(
                                   details['label'] as String,
                                   style: TextStyle(
-                                    color: isSelected ? themeData.colorScheme.onPrimary : Colors.transparent,
+                                    color: isSelected
+                                        ? themeData.colorScheme.onPrimary
+                                        : Colors.transparent,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
