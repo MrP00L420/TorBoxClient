@@ -26,7 +26,9 @@ class TorboxApi {
   // Returns: List<Torrent> — a list of torrent objects parsed from JSON
   // ---------------------------------------------------------------------------
   Future<List<Torrent>> getTorrents() async {
-    final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/mylist');
+    final url = Uri.parse(
+      '$_apiBase/$_apiVersion/api/torrents/mylist?bypass_cache=true',
+    );
     developer.log('Fetching torrents from: $url', name: 'dev.TBox.api');
 
     try {
