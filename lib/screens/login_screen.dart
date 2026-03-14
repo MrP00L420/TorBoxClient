@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:TBox/api.dart';
 import 'package:TBox/storage_service.dart';
+import 'dart:developer' as developer;
 
 class LoginScreen extends StatefulWidget {
   final Function(bool) onLoginResult;
@@ -14,16 +16,55 @@ class _LoginScreenState extends State<LoginScreen> {
   final _apiKeyController = TextEditingController();
   final _storageService = StorageService();
   bool _obscureText = true;
+  bool _isLoading = false; // State to track validation process
 
   Future<void> _login() async {
-    final apiKey = _apiKeyController.text;
-    if (apiKey.isNotEmpty) {
+    final apiKey = _apiKeyController.text.trim();
+    if (apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter an API key')),
+      );
+      return;
+    }
+
+    // Set loading state and disable the button
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 1. Validate the API key by making a request
+      final api = TorboxApi(apiKey);
+      await api.getUserDetails(); // This will throw an exception on failure
+
+      // 2. If validation is successful, save the key and proceed
       await _storageService.saveApiKey(apiKey);
-      widget.onLoginResult(true);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter an API key')));
+      if (mounted) {
+        widget.onLoginResult(true);
+      }
+    } catch (e, s) {
+      developer.log(
+        'API key validation failed',
+        name: 'dev.TBox.login',
+        error: e,
+        stackTrace: s,
+      );
+      if (mounted) {
+        // 3. If validation fails, do NOT save the key and show an error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Login Failed: Please check your API key.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      // Always turn off loading indicator
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -93,6 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextField(
                           controller: _apiKeyController,
                           obscureText: _obscureText,
+                          enabled: !_isLoading, // Disable field while loading
                           style: TextStyle(color: theme.colorScheme.onSurface),
                           decoration: InputDecoration(
                             labelText: 'API Key',
@@ -122,7 +164,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 32),
                         ElevatedButton(
-                          onPressed: _login,
+                          // Disable button when loading, otherwise call _login
+                          onPressed: _isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: theme.colorScheme.primary,
                             foregroundColor: theme.colorScheme.onPrimary,
@@ -132,13 +175,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             elevation: 2,
                           ),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          // Show a progress indicator or text based on loading state
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ],
                     ),
