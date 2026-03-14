@@ -17,11 +17,20 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   Future<User>? _userFuture;
   final _storageService = StorageService();
+  bool _isAppLockEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _userFuture = _fetchUserDetails();
+    _loadAppLockState();
+  }
+
+  Future<void> _loadAppLockState() async {
+    final isEnabled = await _storageService.isAppLockEnabled();
+    setState(() {
+      _isAppLockEnabled = isEnabled;
+    });
   }
 
   Future<User> _fetchUserDetails() async {
@@ -57,6 +66,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           const ThemeSwitcher(),
+          const Divider(),
+          SwitchListTile(
+            title: const Text('App Lock'),
+            subtitle: const Text('Require authentication to open the app'),
+            value: _isAppLockEnabled,
+            onChanged: (bool value) async {
+              await _storageService.setAppLock(value);
+              setState(() {
+                _isAppLockEnabled = value;
+              });
+            },
+            secondary: const Icon(Icons.fingerprint),
+          ),
           const Divider(),
           FutureBuilder<User>(
             future: _userFuture,
