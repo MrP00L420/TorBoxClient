@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:TBox/storage_service.dart';
 
 enum AppTheme { system, light, dark, black }
 
 class ThemeProvider with ChangeNotifier {
-  static const String _themePreferenceKey = 'app_theme';
-
+  final _storageService = StorageService();
   AppTheme _theme = AppTheme.system;
 
   AppTheme get theme => _theme;
@@ -18,32 +17,29 @@ class ThemeProvider with ChangeNotifier {
       case AppTheme.black:
         return ThemeMode.dark;
       case AppTheme.system:
+      default:
         return ThemeMode.system;
     }
   }
 
-  void setTheme(AppTheme theme) async {
+  Future<void> loadTheme() async {
+    final themeString = await _storageService.getTheme();
+    if (themeString != null) {
+      try {
+        _theme = AppTheme.values.firstWhere((e) => e.toString() == themeString);
+      } catch (e) {
+        // Fallback to system theme if the stored value is invalid
+        _theme = AppTheme.system;
+      }
+    }
+    // No need to notify listeners, this is called before runApp
+  }
+
+  Future<void> setTheme(AppTheme theme) async {
     if (_theme == theme) return;
 
     _theme = theme;
-    await _saveTheme(theme);
+    await _storageService.saveTheme(theme.toString());
     notifyListeners();
-  }
-
-  Future<void> loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final themeString = prefs.getString(_themePreferenceKey);
-    if (themeString != null) {
-      _theme = AppTheme.values.firstWhere(
-        (e) => e.toString() == themeString,
-        orElse: () => AppTheme.system,
-      );
-    }
-    // No need to call notifyListeners() here, as the theme is set before the UI is built.
-  }
-
-  Future<void> _saveTheme(AppTheme theme) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_themePreferenceKey, theme.toString());
   }
 }
