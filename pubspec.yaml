@@ -21,6 +21,7 @@ dependencies:
   url_launcher: ^6.3.2
   flutter_secure_storage: ^10.0.0
   local_auth: ^3.0.1
+  share_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:
