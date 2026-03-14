@@ -8,10 +8,17 @@ import 'package:TBox/theme_provider.dart';
 import 'package:local_auth/local_auth.dart';
 import 'dart:developer' as developer;
 
-void main() {
+void main() async {
+  // Ensure that plugin services are initialized before calling `runApp`
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Create and load the theme provider
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadTheme();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+    ChangeNotifierProvider.value(
+      value: themeProvider,
       child: const TBox(),
     ),
   );
@@ -48,14 +55,17 @@ class _TBoxState extends State<TBox> {
         );
       } on PlatformException catch (e) {
         developer.log('Error during authentication', name: 'dev.TBox.auth', error: e);
+        // Keep authenticated as false in case of error
         authenticated = false;
       }
 
+      // If authentication fails or is cancelled, exit the app.
       if (!authenticated) {
         SystemNavigator.pop();
         return;
       }
     } else if (apiKey != null) {
+      // If app lock is not enabled but an API key exists, treat as logged in.
       authenticated = true;
     }
 
@@ -87,6 +97,7 @@ class _TBoxState extends State<TBox> {
   Widget build(BuildContext context) {
     const seedColor = Colors.deepPurple;
 
+    // Using const for themes improves performance as they don't need to be rebuilt.
     final lightTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: seedColor,
@@ -112,9 +123,7 @@ class _TBoxState extends State<TBox> {
         return MaterialApp(
           title: 'TBox',
           theme: lightTheme,
-          darkTheme: themeProvider.theme == AppTheme.black
-              ? blackTheme
-              : darkTheme,
+          darkTheme: themeProvider.theme == AppTheme.black ? blackTheme : darkTheme,
           themeMode: themeProvider.themeMode,
           debugShowCheckedModeBanner: false,
           home: _isAuthenticating
