@@ -19,6 +19,16 @@ class TorboxApi {
     developer.log('TorboxApi initialized', name: 'dev.TBox.api');
   }
 
+  // Helper function to redact the token from a URL for safe logging
+  String _redactUrl(Uri url) {
+    final queryParameters = Map<String, String>.from(url.queryParameters);
+    if (queryParameters.containsKey('token')) {
+      queryParameters['token'] = 'REDACTED';
+      return url.replace(queryParameters: queryParameters).toString();
+    }
+    return url.toString();
+  }
+
   // ---------------------------------------------------------------------------
   // getTorrents()
   // Fetches the list of all torrents associated with the user's account.
@@ -137,7 +147,7 @@ class TorboxApi {
     };
     final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/requestdl')
         .replace(queryParameters: queryParameters);
-    developer.log('Requesting download link from: $url', name: 'dev.TBox.api');
+    developer.log('Requesting download link from: ${_redactUrl(url)}', name: 'dev.TBox.api');
 
     try {
       final response = await http.get(url);
@@ -188,7 +198,7 @@ class TorboxApi {
     final url = Uri.parse('$_apiBase/$_apiVersion/api/torrents/requestdl')
         .replace(queryParameters: queryParameters);
     developer.log(
-      'Requesting ZIP download link from: $url',
+      'Requesting ZIP download link from: ${_redactUrl(url)}',
       name: 'dev.TBox.api',
     );
 

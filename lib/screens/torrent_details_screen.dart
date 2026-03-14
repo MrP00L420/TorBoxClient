@@ -94,7 +94,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
       );
 
       developer.log(
-        'Got download link: $downloadLink',
+        'Got download link: REDACTED',
         name: 'dev.TBox.download',
       );
 
@@ -121,10 +121,10 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
       developer.log('Error downloading file: $e', name: 'dev.TBox.download');
       if (!mounted) return;
 
-      // Show error message in a SnackBar
+      // Show a generic error message in the SnackBar to avoid leaking info
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Download error: $e'),
+          content: const Text('An error occurred while getting the download link.'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -179,7 +179,7 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
       );
 
       developer.log(
-        'Got ZIP download link: $downloadLink',
+        'Got ZIP download link: REDACTED',
         name: 'dev.TBox.download',
       );
 
@@ -206,10 +206,10 @@ class _TorrentDetailsScreenState extends State<TorrentDetailsScreen> {
       developer.log('Error downloading ZIP: $e', name: 'dev.TBox.download');
       if (!mounted) return;
 
-      // Show error message in a SnackBar
+      // Show a generic error message in the SnackBar to avoid leaking info
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('ZIP download error: $e'),
+          content: const Text('An error occurred while getting the ZIP link.'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
